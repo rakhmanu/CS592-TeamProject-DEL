@@ -6,7 +6,7 @@ First, clone the repo and instantiate a catkin workspace in the root directory
 ~~~~bash
 git clone https://github.com/rakhmanu/CS592-TeamProject-DEL.git
 ~~~~
-
+## Experiment Setup
 Please follow the commands: 
 ~~~~bash
 cd CS592-TeamProject-DEL
@@ -20,3 +20,8 @@ You can run our Haetae robot.
 source ./robot.sh sim manip
 roslaunch riro_bringup summit_xls_riro_complete.launch
 ~~~~
+
+### Motion Planning
+## For controlling using rviz MoveIt! and visualizing the movement in gazebo for the gripper and the arm, launch the following file:
+## For loading the planning scene please ensure that the simulation is running and then
+
