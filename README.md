@@ -23,7 +23,7 @@ source ./install.sh
 You can run our Haetae robot.
 ~~~~bash
 source ./robot.sh sim manip
-roslaunch riro_bringup summit_xls_riro_complete.launch
+roslaunch riro_bringup summit_xls_riro_complete_cs592class.launch
 ~~~~
 
 ### For controlling using rviz MoveIt! and visualizing the movement in gazebo for the gripper and the arm, launch the following file:
