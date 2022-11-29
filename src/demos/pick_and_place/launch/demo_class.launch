@@ -7,7 +7,7 @@
   <arg name="arm_prefix" default="$(arg prefix)ur5e_"/>
   <arg name="sim" default="true" />
   <arg name="perception_src" default="gazebo" />
-  <arg name="world_file" default="$(find world_model_data)/data/worlds/haetae_3_blocks2.xml" />
+  <arg name="world_file" default="$(find world_model_data)/data/worlds/haetae_3_blocks.xml" />
   <arg name="world_channel" default="world_model" />
   <arg name="fact_channel" default="add_facts" />
   <arg name="enable_speech" default="false" />
@@ -116,4 +116,3 @@
 
   
 </launch>
-  
