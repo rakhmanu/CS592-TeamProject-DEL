@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <!-- set all arguments -->
+  <arg name="id_robot" default="$(optenv ROBOT_ID robot)"/>
+  <arg name="prefix" default="$(arg id_robot)_"/>
+  <arg name="arm_prefix" default="$(arg prefix)ur5e_"/>
+  <arg name="sim" default="true" />
+  <arg name="perception_src" default="gazebo" />
+  <arg name="world_file" default="$(find world_model_data)/data/worlds/haetae_3_blocks2.xml" />
+  <arg name="world_channel" default="world_model" />
+  <arg name="fact_channel" default="add_facts" />
+  <arg name="enable_speech" default="false" />
+  <arg name="enable_listen" default="false" />
+  <arg name="enable_command" default="false" />
+
+  <param name="world_frame" type="str" value="$(arg prefix)map" />
+  
+  <!-- Main robot parameters -->
+  
+  
+  <group ns="$(arg id_robot)">
+
+    <!-- Set robot-specific paramters -->
+    <param name="torso_frame" type="str" value="$(arg prefix)base_link" />
+    <param name="arm_base_frame" type="str" value="$(arg arm_prefix)base_link" />
+    <param name="ee_frame" type="str" value="$(arg prefix)gripper_base_link" />
+    <param name="tool_offset_frame" type="str" value="[0.15, 0.003,0,0,-1.5707,0]" />
+    <param name="controller_ns" type="str" value="manipulator_controller" />
+    <param name="init_config" type="str" value="[1.570796,-1.570796,1.570796,-1.570796,-1.570796,0]" />
+  
+      <!-- Simulation -->
+      <group if="$(arg sim)">      
+        <param name="gripper_open_pos" type="double" value="0.1" />
+        <param name="gripper_close_pos" type="double" value="0.8" />
+        <param name="gripper_open_force" type="double" value="10." />
+        <param name="gripper_close_force" type="double" value="0.01" />
+        <param name="gripper_action_topic" type="str"
+               value="gripper_controller/gripper_cmd" />
+        
+        <!--Initialize the configuration of the UR5e -->
+        <node name="init_joints" pkg="riro_bringup" type="init_ur5e_sim" args="--unfold" output="screen" />
+        <node name="action_client"
+              pkg="complex_action_client"
+              type="arm_client_ur5_robotiq_2F_85.py"
+              args="--sim --init"
+              output="screen"
+              required="true" >
+          <remap from="/robot_description" to="/$(arg id_robot)/robot_description"/>
+          <remap from="/joint_states" to="/$(arg id_robot)/joint_states"/>  
+        </node>
+        <node name="behavior_tree"
+              pkg="behavior_tree"
+              type="dynamic_behavior_tree.py"
+              output="screen"
+              required="true" />
+
+        <!-- start nlu node -->
+        <!-- <include file="$(find pick_ane_place_demo)/launch/nlu.launch" > -->
+        <!--   <arg name="id_robot" value="$(arg id_robot)" /> -->
+        <!--   <arg name="enable_speech" value="$(arg enable_speech)" /> -->
+        <!--   <arg name="enable_listen" value="$(arg enable_listen)" /> -->
+        <!--   <arg name="enable_command" value="$(arg enable_command)" /> -->
+        <!-- </include> -->
+        
+      </group>
+  
+      <!-- Real robot -->
+      <group unless="$(arg sim)">
+
+        <param name="gripper_open_pos" type="double" value="0.08" />
+        <param name="gripper_close_pos" type="double" value="0.01" />
+        <param name="gripper_open_force" type="double" value="0.001" />
+        <param name="gripper_close_force" type="double" value="10." />
+        <param name="gripper_action_topic" type="str"
+               value="gripper_actions/gripper_command" />
+        
+	<node pkg="tf" type="static_transform_publisher"
+              name="static_map_broadcaster" args="0 0 0 0 0 0 $(arg
+                                                  prefix)map $(arg
+                                                  prefix)base_footprint 100" />
+        
+        <node name="real_action_client"
+              pkg="complex_action_client"
+              type="arm_client_ur5_robotiq_2F_85.py"
+              args="--timeout_scale 0.5"
+              output="screen"
+              required="true" >
+          <remap from="/robot_description" to="/$(arg id_robot)/robot_description"/>
+          <remap from="/joint_states" to="/$(arg id_robot)/joint_states"/>  
+        </node>
+
+        <node name="behavior_tree"
+              pkg="behavior_tree"
+              type="dynamic_behavior_tree.py"
+              output="screen"
+              required="true" />
+        
+      </group>
+  </group>
+
+
+  <!-- start world model node -->
+  <include file="$(find world_model)/launch/world_model.launch">
+    <arg name="world_file" value="$(arg world_file)" />
+    <arg name="world_channel" value="$(arg world_channel)" />
+    <arg name="fact_channel" value="$(arg fact_channel)" />
+    <arg name="sim" value="$(arg sim)" />
+    <!-- <arg name="sim" value="false" /> -->
+    <arg name="perception_src" value="$(arg perception_src)" />
+
+    <remap from="ee_frame" to="/$(arg id_robot)/ee_frame"/>
+    <remap from="tool_frame" to="/$(arg id_robot)/tool_frame"/>
+    
+  </include>  
+
+  
+</launch>
+  
